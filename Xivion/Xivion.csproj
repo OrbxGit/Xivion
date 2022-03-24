@@ -64,11 +64,13 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MainWindow.cs" />
+    <Compile Include="Configuration\Settings.cs" />
+    <Compile Include="Windows\MainWindow.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Windows\SettingsWindow.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

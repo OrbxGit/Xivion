@@ -6,6 +6,9 @@ using ICSharpCode.AvalonEdit;
 using System.Windows.Controls;
 using WeAreDevs_API;
 using Microsoft.Win32;
+using System.Windows.Threading;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Xivion
 {
@@ -31,19 +34,27 @@ namespace Xivion
         private readonly Button _clearButton;
         private readonly Button _openFileButton;
         private readonly Button _saveFileButton;
+
+        private readonly Button _settingsButton;
         private readonly Button _attachButton;
 
         private readonly FileSystemWatcher _scriptWatcher;
-        
+        private readonly DispatcherTimer _autoAttachTimer;
+
         private string ScriptsPath => $"{Environment.CurrentDirectory}\\Scripts";
+        private string AutoExecPath => $"{Environment.CurrentDirectory}\\AutoExec";
+        private string[] SupportedFileType => new[] { "*.txt", "*.lua", "*.luau" };
+
         private ListBoxItem SelectedItem => _scriptList.SelectedItem as ListBoxItem;
         private ExploitAPI WRDAPI => new ExploitAPI();
+
 
         public MainWindow()
         {
             // Window properties
-            Title = "MainWindow";
+            Title = nameof(MainWindow);
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            Topmost = Settings.Default.AlwaysOnTop;
 
             Width = 500;
             Height = 350;
@@ -135,9 +146,17 @@ namespace Xivion
                 Margin = new Thickness(5, 0, 0, 0),
                 Padding = new Thickness(8, 3, 8, 3)
             };
+
+            _settingsButton = new Button()
+            {
+                Content = "Settings",
+                Padding = new Thickness(8, 3, 8, 3)
+            };
+
             _attachButton = new Button()
             {
                 Content = "Attach",
+                Margin = new Thickness(5, 0, 0, 0),
                 Padding = new Thickness(8, 3, 8, 3)
             };
 
@@ -146,6 +165,28 @@ namespace Xivion
                 EnableRaisingEvents = true,
                 IncludeSubdirectories = true
             };
+
+            _autoAttachTimer = new DispatcherTimer()
+            { Interval = TimeSpan.FromSeconds(8) };
+
+            int PID = 0;
+            _autoAttachTimer.Tick += async (_, __) =>
+            {
+                if (!Settings.Default.AutoAttach)
+                    return;
+
+                Process[] rProcs = Process.GetProcessesByName("RobloxPlayerBeta");
+                if (rProcs.Length < 1 || rProcs[0].MainWindowHandle == IntPtr.Zero)
+                    return;
+
+                if (rProcs[0].Id == PID || WRDAPI.isAPIAttached())
+                    return;
+
+                PID = rProcs[0].Id;
+                await Task.Delay(3000);
+                WRDAPI.LaunchExploit();
+            };
+            _autoAttachTimer.Start();
 
             _scriptWatcher.Changed += OnScript_Changed;
             _scriptWatcher.Created += OnScript_Changed;
@@ -159,7 +200,7 @@ namespace Xivion
 
             Button[] utilityButton =
                 { _executeButton, _clearButton,
-                _openFileButton, _saveFileButton, _attachButton };
+                _openFileButton, _saveFileButton, _settingsButton, _attachButton };
 
             for (int i = 0; i < utilityButton.Length; i++)
                 utilityButton[i].Click += UtilityButton_Click;
@@ -189,6 +230,7 @@ namespace Xivion
             _buttonsGrid.Children.Add(_buttonRightPanel);
             _buttonsGrid.Children.Add(_buttonLeftPanel);
 
+            _buttonRightPanel.Children.Add(_settingsButton);
             _buttonRightPanel.Children.Add(_attachButton);
 
             _buttonLeftPanel.Children.Add(_executeButton);
@@ -202,11 +244,9 @@ namespace Xivion
         private void RelocateScripts()
         {
             _scriptList.Items.Clear();
-
             var dirInfo = new DirectoryInfo(ScriptsPath);
-            string[] fileType = { "*.txt", "*.lua" };
 
-            foreach (var fType in fileType)
+            foreach (var fType in SupportedFileType)
             {
                 foreach (var script in dirInfo.GetFiles(fType, SearchOption.AllDirectories))
                 {
@@ -266,8 +306,24 @@ namespace Xivion
                 if (SaveDialog.ShowDialog().GetValueOrDefault())
                     _textEditor.Save(SaveDialog.FileName);
             }
+            else if (BUTTON_IDENTIFIER == _settingsButton.GetHashCode())
+                new SettingsWindow() { Owner = this }.ShowDialog();
             else if (BUTTON_IDENTIFIER == _attachButton.GetHashCode())
+            {
                 WRDAPI.LaunchExploit();
+                
+                if (!Settings.Default.AutoExecute)
+                    return;
+
+                Task.Factory.StartNew(() =>
+                {
+                    while (!WRDAPI.isAPIAttached()) { }
+
+                    foreach (var fType in SupportedFileType)
+                        foreach (var file in Directory.GetFiles(AutoExecPath, fType, SearchOption.AllDirectories))
+                            WRDAPI.SendLuaScript(File.ReadAllText(file));
+                });
+            }
         }
     }
 }
