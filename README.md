@@ -5,4 +5,5 @@
 - [ ] Tab System
 - [ ] Script Hub
 - [ ] Search Box
+- [ ] JSON Theme
 - [ ] And more...
