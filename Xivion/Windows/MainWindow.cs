@@ -14,19 +14,18 @@ namespace Xivion
 {
     public class MainWindow : Window
     {
+        // Panels
         private readonly Grid _mainGrid;
         private readonly Grid _editorGrid;
         private readonly Grid _buttonsGrid;
         private readonly GridSplitter _splitter;
-
-        private readonly GridLengthConverter _gridLengthConverter;
         private readonly StackPanel _buttonLeftPanel;
         private readonly StackPanel _buttonRightPanel;
 
+        // Controls
         private readonly TextEditor _textEditor;
         private readonly ListBox _scriptList;
 
-        private readonly ContextMenu _scriptListMenu;
         private readonly MenuItem _loadMenu;
         private readonly MenuItem _executeMenu;
 
@@ -38,9 +37,11 @@ namespace Xivion
         private readonly Button _settingsButton;
         private readonly Button _attachButton;
 
+        // Service
         private readonly FileSystemWatcher _scriptWatcher;
         private readonly DispatcherTimer _autoAttachTimer;
 
+        // Properties
         private string ScriptsPath => $"{Environment.CurrentDirectory}\\Scripts";
         private string AutoExecPath => $"{Environment.CurrentDirectory}\\AutoExec";
         private string[] SupportedFileType => new[] { "*.txt", "*.lua", "*.luau" };
@@ -48,39 +49,36 @@ namespace Xivion
         private ListBoxItem SelectedItem => _scriptList.SelectedItem as ListBoxItem;
         private ExploitAPI WRDAPI => new ExploitAPI();
 
-
         public MainWindow()
         {
-            // Window properties
             Title = nameof(MainWindow);
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
             Topmost = Settings.Default.AlwaysOnTop;
 
             Width = 500;
-            Height = 350;
+            Height = 330;
 
-            MinWidth = (Width / 2) * 1.5;
-            MinHeight = (Height / 2) * 1.5;
+            MinWidth = Width;
+            MinHeight = Height;
 
-            // Instance
             _mainGrid = new Grid
             {
-                Margin = new Thickness(5)
+                Margin = new Thickness(8)
             };
             _editorGrid = new Grid();
             _buttonsGrid = new Grid()
             {
-                Margin = new Thickness(0, 5, 0, 0)
+                Margin = new Thickness(0, 8, 0, 0)
             };
             _splitter = new GridSplitter()
             {
-                Margin = new Thickness(0, 0, -5, 0),
+                Margin = new Thickness(0, 0, -8, 0),
                 ResizeDirection = GridResizeDirection.Columns,
-                Width = 5,
+                Width = 8,
+                Background = Brushes.Transparent
             };
 
-            _gridLengthConverter = new GridLengthConverter();
-
+            // Panels
             _buttonRightPanel = new StackPanel()
             {
                 Orientation = Orientation.Horizontal,
@@ -101,30 +99,32 @@ namespace Xivion
                 FontFamily = new FontFamily("Consolas"),
                 FontSize = 16,
                 HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
-                VerticalScrollBarVisibility = ScrollBarVisibility.Visible,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
                 Padding = new Thickness(3),
             };
-            _scriptListMenu = new ContextMenu();
-
             _loadMenu = new MenuItem()
-            { Header = "Load" };
+            { 
+                Header = "Load" 
+            };
             _executeMenu = new MenuItem()
-            { Header = "Execute" };
-
+            { 
+                Header = "Execute"
+            };
             _scriptList = new ListBox()
-            { Margin = new Thickness(5, 0, 0, 0), Padding = new Thickness(3), };
+            { 
+                Margin = new Thickness(8, 0, 0, 0),
+                Padding = new Thickness(3)
+            };
 
-            _scriptList.ContextMenu = _scriptListMenu;
-
-            _scriptListMenu.Items.Add(_loadMenu);
-            _scriptListMenu.Items.Add(_executeMenu);
+            _scriptList.ContextMenu = new ContextMenu();
+            _scriptList.ContextMenu.Items.Add(_loadMenu);
+            _scriptList.ContextMenu.Items.Add(_executeMenu);
 
             _loadMenu.Click += LoadMenu_Click;
             _executeMenu.Click += ExecuteMenu_Click;
 
-            // Buttons
             _executeButton = new Button()
-            { 
+            {
                 Content = "Execute",
                 Padding = new Thickness(8, 3, 8, 3)
             };
@@ -146,13 +146,11 @@ namespace Xivion
                 Margin = new Thickness(5, 0, 0, 0),
                 Padding = new Thickness(8, 3, 8, 3)
             };
-
             _settingsButton = new Button()
             {
                 Content = "Settings",
                 Padding = new Thickness(8, 3, 8, 3)
             };
-
             _attachButton = new Button()
             {
                 Content = "Attach",
@@ -165,7 +163,6 @@ namespace Xivion
                 EnableRaisingEvents = true,
                 IncludeSubdirectories = true
             };
-
             _autoAttachTimer = new DispatcherTimer()
             { Interval = TimeSpan.FromSeconds(8) };
 
@@ -193,39 +190,31 @@ namespace Xivion
             _scriptWatcher.Deleted += OnScript_Changed;
             _scriptWatcher.Renamed += OnScript_Changed;
 
+            OnScript_Changed(null, null);
             void OnScript_Changed(object _, FileSystemEventArgs __)
                 => Dispatcher.Invoke(RelocateScripts);
 
-            OnScript_Changed(null, null);
-
-            Button[] utilityButton =
-                { _executeButton, _clearButton,
-                _openFileButton, _saveFileButton, _settingsButton, _attachButton };
+            Button[] utilityButton = {
+                _executeButton, _clearButton,
+                _openFileButton, _saveFileButton,
+                _settingsButton, _attachButton 
+            };
 
             for (int i = 0; i < utilityButton.Length; i++)
                 utilityButton[i].Click += UtilityButton_Click;
 
-            // Rows & Columns
             _mainGrid.RowDefinitions.Add(new RowDefinition());
             _mainGrid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
+
+            _editorGrid.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridHelper.ConvertFromString("2*") });
+            _editorGrid.ColumnDefinitions.Add(new ColumnDefinition());
 
             _mainGrid.Children.Add(_editorGrid);
             _mainGrid.Children.Add(_buttonsGrid);
 
-            // Set rows
-            Grid.SetRow(_editorGrid, 0);
-            Grid.SetRow(_buttonsGrid, 1);
-
-            _editorGrid.ColumnDefinitions.Add(new ColumnDefinition() { Width = (GridLength)_gridLengthConverter.ConvertFromString("2*") });
-            _editorGrid.ColumnDefinitions.Add(new ColumnDefinition());
-
-            // Controls
             _editorGrid.Children.Add(_textEditor);
             _editorGrid.Children.Add(_scriptList);
             _editorGrid.Children.Add(_splitter);
-
-            Grid.SetColumn(_textEditor, 0);
-            Grid.SetColumn(_scriptList, 1);
 
             _buttonsGrid.Children.Add(_buttonRightPanel);
             _buttonsGrid.Children.Add(_buttonLeftPanel);
@@ -237,6 +226,12 @@ namespace Xivion
             _buttonLeftPanel.Children.Add(_clearButton);
             _buttonLeftPanel.Children.Add(_openFileButton);
             _buttonLeftPanel.Children.Add(_saveFileButton);
+
+            _editorGrid.SetRow(0);
+            _buttonsGrid.SetRow(1);
+
+            _textEditor.SetColumn(0);
+            _scriptList.SetColumn(1);
 
             AddChild(_mainGrid);
         }
@@ -261,19 +256,19 @@ namespace Xivion
             }
         }
 
-        private void ExecuteMenu_Click(object sender, RoutedEventArgs e)
-        {
-            if (SelectedItem == null)
-                return;
-
-            WRDAPI.SendLuaScript(File.ReadAllText(SelectedItem.Tag.ToString()));
-        }
         private void LoadMenu_Click(object sender, RoutedEventArgs e)
         {
             if (SelectedItem == null)
                 return;
 
             _textEditor.Load(SelectedItem.Tag.ToString());
+        }
+        private void ExecuteMenu_Click(object sender, RoutedEventArgs e)
+        {
+            if (SelectedItem == null)
+                return;
+
+            WRDAPI.SendLuaScript(File.ReadAllText(SelectedItem.Tag.ToString()));
         }
 
         private void UtilityButton_Click(object sender, RoutedEventArgs e)

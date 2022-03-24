@@ -13,7 +13,6 @@ namespace Xivion
                 throw new ArgumentException("This program does not expect any args!");
 
             string[] dirs = { "Workspace", "AutoExec", "Scripts", "Bin" };
-
             for (int i = 0; i < dirs.Length; i++)
                 if (!Directory.Exists(dirs[i])) Directory.CreateDirectory(dirs[i]);
 
