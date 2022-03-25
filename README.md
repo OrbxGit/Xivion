@@ -19,3 +19,7 @@
 - [ ] ZEUSX_DLL
 - [ ] OXYGENU_DLL
 - [ ] FLUXUS_DLL
+
+___
+# INSTALLING
+Go to [RELEASES](https://github.com/OrbxGit/Xivion/releases/tag/Release) Go to any version and download Release.zip
