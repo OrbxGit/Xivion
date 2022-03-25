@@ -80,11 +80,14 @@ namespace Xivion
             {
                 Margin = new Thickness(8)
             };
+
             _editorGrid = new Grid();
+
             _buttonsGrid = new Grid()
             {
                 Margin = new Thickness(0, 8, 0, 0)
             };
+
             _scriptListGrid = new Grid()
             {
                 Margin = new Thickness(8, 0, 0, 0)
@@ -104,6 +107,7 @@ namespace Xivion
                 Orientation = Orientation.Horizontal,
                 HorizontalAlignment = HorizontalAlignment.Right
             };
+
             _buttonLeftPanel = new StackPanel()
             {
                 Orientation = Orientation.Horizontal,
@@ -122,10 +126,12 @@ namespace Xivion
                 VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
                 Padding = new Thickness(3),
             };
+
             _loadMenu = new MenuItem()
             { 
                 Header = "Load" 
             };
+
             _executeMenu = new MenuItem()
             { 
                 Header = "Execute"
@@ -135,6 +141,7 @@ namespace Xivion
             {
                 Padding = new Thickness(2),
             };
+
             _scriptList = new ListBox()
             { 
                 Margin = new Thickness(0, 8, 0, 0),
@@ -154,29 +161,34 @@ namespace Xivion
                 Content = "Execute",
                 Padding = new Thickness(8, 3, 8, 3)
             };
+
             _clearButton = new Button()
             { 
                 Content = "Clear",
                 Margin = new Thickness(5, 0, 0, 0),
                 Padding = new Thickness(8, 3, 8, 3)
             };
+
             _openFileButton = new Button()
             {
                 Content = "Open",
                 Margin = new Thickness(5, 0, 0, 0),
                 Padding = new Thickness(8, 3, 8, 3)
             };
+
             _saveFileButton = new Button()
             {
                 Content = "Save",
                 Margin = new Thickness(5, 0, 0, 0),
                 Padding = new Thickness(8, 3, 8, 3)
             };
+
             _settingsButton = new Button()
             {
                 Content = "Settings",
                 Padding = new Thickness(8, 3, 8, 3)
             };
+
             _attachButton = new Button()
             {
                 Content = "Attach",
@@ -189,6 +201,7 @@ namespace Xivion
                 EnableRaisingEvents = true,
                 IncludeSubdirectories = true
             };
+
             _autoAttachTimer = new DispatcherTimer()
             { Interval = TimeSpan.FromSeconds(8) };
 
@@ -329,6 +342,7 @@ namespace Xivion
 
             _textEditor.Load(SelectedItem.Tag.ToString());
         }
+
         private void ExecuteMenu_Click(object sender, RoutedEventArgs e)
         {
             if (SelectedItem == null)

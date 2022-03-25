@@ -41,6 +41,7 @@ namespace Xivion
             { 
                 Margin = new Thickness(5)
             };
+
             _checkPanel = new StackPanel()
             {
                 VerticalAlignment = VerticalAlignment.Center,
@@ -52,19 +53,23 @@ namespace Xivion
             { 
                 Content = "Top Most"
             };
+
             _autoAttachBox = new CheckBox()
             { 
                 Content = "Auto Attach"
             };
+            
             _autoExecuteBox = new CheckBox()
             { 
                 Content = "Auto Execute"
             };
+            
             _killRobloxButton = new Button()
             {
                 Content = "Kill Roblox",
                 Margin = new Thickness(0, 20, 0, 0)
             };
+            
             _killRobloxButton.Click += _killRobloxButton_Click;
 
             _mainGrid.Children.Add(_checkPanel);
@@ -96,6 +101,7 @@ namespace Xivion
             _autoAttachBox.IsChecked = Settings.Default.AutoAttach;
             _autoExecuteBox.IsChecked = Settings.Default.AutoExecute;
         }
+
         private void SettingsWindow_Closing(object sender, CancelEventArgs e)
         {
             if (e.Cancel)
