@@ -69,6 +69,7 @@
   <ItemGroup>
     <Compile Include="Configuration\Settings.cs" />
     <Compile Include="Helpers\GridHelper.cs" />
+    <Compile Include="Helpers\RegistryKeyHelper.cs" />
     <Compile Include="Windows\MainWindow.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">

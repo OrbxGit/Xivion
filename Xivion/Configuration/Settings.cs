@@ -1,6 +1,4 @@
 ﻿using Microsoft.Win32;
-using System;
-using System.Linq;
 
 namespace Xivion
 {
@@ -8,43 +6,25 @@ namespace Xivion
     {
         public static Settings Default => new Settings("Vixion");
         private readonly RegistryKey RegKey;
-
+        
         public Settings(string Name)
             => RegKey = Registry.CurrentUser.OpenSubKey($"SOFTWARE\\{Name}", true) ?? Registry.CurrentUser.CreateSubKey(Name, true);
 
         public bool AlwaysOnTop
         {
-            get
-            {
-                if (!RegKey.GetValueNames().Contains(nameof(AlwaysOnTop)))
-                    RegKey.SetValue(nameof(AlwaysOnTop), false);
-
-                return Convert.ToBoolean(RegKey.GetValue(nameof(AlwaysOnTop)));
-            }
+            get => RegKey.GetValue<bool>();
             set => RegKey.SetValue(nameof(AlwaysOnTop), value);
         }
 
         public bool AutoAttach
         {
-            get
-            {
-                if (!RegKey.GetValueNames().Contains(nameof(AutoAttach)))
-                    RegKey.SetValue(nameof(AutoAttach), false);
-
-                return Convert.ToBoolean(RegKey.GetValue(nameof(AutoAttach)));
-            }
+            get => RegKey.GetValue<bool>();
             set => RegKey.SetValue(nameof(AutoAttach), value);
         }
 
         public bool AutoExecute
         {
-            get
-            {
-                if (!RegKey.GetValueNames().Contains(nameof(AutoExecute)))
-                    RegKey.SetValue(nameof(AutoExecute), false);
-
-                return Convert.ToBoolean(RegKey.GetValue(nameof(AutoExecute)));
-            }
+            get => RegKey.GetValue<bool>();
             set => RegKey.SetValue(nameof(AutoExecute), value);
         }
     }

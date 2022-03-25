@@ -2,28 +2,35 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
+using System.Threading.Tasks;
 using ICSharpCode.AvalonEdit;
 using System.Windows.Controls;
-using WeAreDevs_API;
-using Microsoft.Win32;
 using System.Windows.Threading;
 using System.Diagnostics;
-using System.Threading.Tasks;
+using Microsoft.Win32;
+using WeAreDevs_API;
+using System.Collections.Generic;
 
 namespace Xivion
 {
     public class MainWindow : Window
     {
+        #region Properties
+
         // Panels
         private readonly Grid _mainGrid;
         private readonly Grid _editorGrid;
         private readonly Grid _buttonsGrid;
+        private readonly Grid _scriptListGrid;
+
         private readonly GridSplitter _splitter;
         private readonly StackPanel _buttonLeftPanel;
         private readonly StackPanel _buttonRightPanel;
 
         // Controls
         private readonly TextEditor _textEditor;
+
+        private readonly TextBox _searchTextBox;
         private readonly ListBox _scriptList;
 
         private readonly MenuItem _loadMenu;
@@ -48,7 +55,15 @@ namespace Xivion
 
         private ListBoxItem SelectedItem => _scriptList.SelectedItem as ListBoxItem;
         private ExploitAPI WRDAPI => new ExploitAPI();
+        private List<ListBoxItem> _scriptItemList;
 
+        #endregion
+
+        #region Constructor
+
+        /// <summary>
+        /// A constructor for <see cref="MainWindow"/> class
+        /// </summary>
         public MainWindow()
         {
             Title = nameof(MainWindow);
@@ -70,6 +85,11 @@ namespace Xivion
             {
                 Margin = new Thickness(0, 8, 0, 0)
             };
+            _scriptListGrid = new Grid()
+            {
+                Margin = new Thickness(8, 0, 0, 0)
+            };
+
             _splitter = new GridSplitter()
             {
                 Margin = new Thickness(0, 0, -8, 0),
@@ -110,9 +130,14 @@ namespace Xivion
             { 
                 Header = "Execute"
             };
+
+            _searchTextBox = new TextBox()
+            {
+                Padding = new Thickness(2),
+            };
             _scriptList = new ListBox()
             { 
-                Margin = new Thickness(8, 0, 0, 0),
+                Margin = new Thickness(0, 8, 0, 0),
                 Padding = new Thickness(3)
             };
 
@@ -122,6 +147,7 @@ namespace Xivion
 
             _loadMenu.Click += LoadMenu_Click;
             _executeMenu.Click += ExecuteMenu_Click;
+            _searchTextBox.TextChanged += SearchTextBox_TextChanged;
 
             _executeButton = new Button()
             {
@@ -206,15 +232,24 @@ namespace Xivion
             _mainGrid.RowDefinitions.Add(new RowDefinition());
             _mainGrid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
 
-            _editorGrid.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridHelper.ConvertFromString("2*") });
+            _editorGrid.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridHelper.GetGridLengthFromString("2*") });
             _editorGrid.ColumnDefinitions.Add(new ColumnDefinition());
 
             _mainGrid.Children.Add(_editorGrid);
             _mainGrid.Children.Add(_buttonsGrid);
 
             _editorGrid.Children.Add(_textEditor);
-            _editorGrid.Children.Add(_scriptList);
+            _editorGrid.Children.Add(_scriptListGrid);
             _editorGrid.Children.Add(_splitter);
+
+            _scriptListGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(26) });
+            _scriptListGrid.RowDefinitions.Add(new RowDefinition());
+
+            _scriptListGrid.Children.Add(_searchTextBox);
+            _scriptListGrid.Children.Add(_scriptList);
+
+            _searchTextBox.SetRow(0);
+            _scriptList.SetRow(1);
 
             _buttonsGrid.Children.Add(_buttonRightPanel);
             _buttonsGrid.Children.Add(_buttonLeftPanel);
@@ -231,14 +266,38 @@ namespace Xivion
             _buttonsGrid.SetRow(1);
 
             _textEditor.SetColumn(0);
-            _scriptList.SetColumn(1);
+            _scriptListGrid.SetColumn(1);
 
             AddChild(_mainGrid);
         }
 
+        private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(_searchTextBox.Text) ||
+                string.IsNullOrWhiteSpace(_searchTextBox.Text))
+            {
+                RelocateScripts();
+                return;
+            }
+
+            _scriptList.Items.Clear();
+
+            foreach (ListBoxItem script in _scriptItemList)
+            {
+                if (script.Content.ToString().ToLower().Contains(_searchTextBox.Text.ToLower()))
+                    _scriptList.Items.Add(script);
+            }
+        }
+
+        #endregion
+
+        #region Helpers
+
         private void RelocateScripts()
         {
             _scriptList.Items.Clear();
+            _scriptItemList = new List<ListBoxItem>();
+
             var dirInfo = new DirectoryInfo(ScriptsPath);
 
             foreach (var fType in SupportedFileType)
@@ -254,7 +313,14 @@ namespace Xivion
                     _scriptList.Items.Add(scriptItem);
                 }
             }
+
+            foreach (ListBoxItem item in _scriptList.Items)
+                _scriptItemList.Add(item);
         }
+
+        #endregion
+
+        #region Events
 
         private void LoadMenu_Click(object sender, RoutedEventArgs e)
         {
@@ -320,5 +386,7 @@ namespace Xivion
                 });
             }
         }
+
+        #endregion
     }
 }

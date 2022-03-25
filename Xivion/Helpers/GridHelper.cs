@@ -5,7 +5,7 @@ namespace Xivion
 {
     public static class GridHelper
     {
-        public static GridLength ConvertFromString(string Value)
+        public static GridLength GetGridLengthFromString(string Value)
             => ((GridLength)(new GridLengthConverter().ConvertFromString(Value)));
 
         public static void SetRow(this UIElement targetElement, int Index)

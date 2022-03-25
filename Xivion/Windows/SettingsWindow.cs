@@ -1,12 +1,14 @@
-﻿using System.ComponentModel;
+﻿using System.Windows;
 using System.Diagnostics;
-using System.Windows;
+using System.ComponentModel;
 using System.Windows.Controls;
 
 namespace Xivion
 {
     public class SettingsWindow : Window
     {
+        #region Properties
+
         // Panels
         private readonly Grid _mainGrid;
         private readonly StackPanel _checkPanel;
@@ -18,6 +20,13 @@ namespace Xivion
 
         private readonly Button _killRobloxButton;
 
+        #endregion
+
+        #region Constructor
+
+        /// <summary>
+        /// A constructor for <see cref="SettingsWindow"/> class
+        /// </summary>
         public SettingsWindow()
         {
             Title = nameof(SettingsWindow);
@@ -71,6 +80,10 @@ namespace Xivion
             Closing += SettingsWindow_Closing;
         }
 
+        #endregion
+
+        #region Events
+
         private void _killRobloxButton_Click(object sender, RoutedEventArgs e)
         {
             foreach (Process rProc in Process.GetProcessesByName("RobloxPlayerBeta"))
@@ -95,5 +108,7 @@ namespace Xivion
             foreach (Window window in Application.Current.Windows)
                 window.Topmost = Settings.Default.AlwaysOnTop || _alwaysOnTopBox.IsChecked.GetValueOrDefault();
         }
+
+        #endregion
     }
 }
